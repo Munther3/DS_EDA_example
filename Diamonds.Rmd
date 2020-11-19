@@ -1,0 +1,164 @@
+---
+html_document:
+  toc: yes
+  toc_depth: '3'
+  df_print: paged
+author: "Munther Alnghemshi"
+date: "11/19/2020"
+title: "Diamond analysis"
+---
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#packages
+library(MASS)
+library(ggplot2)
+library(dplyr)
+library(data.table)
+library(tidyr)
+library(tidyverse)
+library(DT)
+library(pander)
+```
+\
+\
+\
+\
+\
+
+### Table
+'
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+head(diamonds) #show head of data table
+```
+
+### Numerical values
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+diamonds %>%
+  summarise(mean = mean(price), sd = sd(price), median = median(price)) #avg and median of prices 
+
+
+diamonds %>% #summurize the frequency of each cut 
+  group_by(cut) %>%
+  summarise(counts = n())
+
+```
+
+### Representation for categorical variable of colors
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(data = diamonds, aes(x = color)) + #rep of colo
+  geom_bar()
+```
+
+
+#### Price vs Number of Diamonds:
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+qplot(x = price, data = diamonds, fill = I('blue'), color = I('black'),
+      binwidth = 450)+
+  scale_x_continuous(breaks = seq(0,20000, 2000))+
+  ylab('Number of Diamonds')+
+  xlab('Price')
+```
+
+
+
+
+
+Through a box plot, we observe that the highest price diamonds are premium cut, lowest price diamonds are ideal cut.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+diamonds %>%
+  ggplot(aes(x=cut,y=price, color=cut)) +
+  geom_boxplot() #color vs price
+```
+
+
+***
+\
+
+#### Color vs Number of Diamonds using Box-Plot
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+qplot(x = color, data = diamonds, y = price, geom = 'boxplot') +
+  coord_cartesian(ylim = c(0, 10000))+
+  ylab('No. of Diamonds')+
+  xlab('Color')
+```
+
+***
+
+### The price of a diamond and it’s carat weight
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(diamonds,aes(x=carat,y=price))+
+  geom_point(color='blue',fill='blue')+ #carat vs price
+  xlim(0,quantile(diamonds$carat,0.99))+
+  ylim(0,quantile(diamonds$price,0.99))+
+  ggtitle('Diamond price vs. carat')
+```
+
+
+***
+\
+\
+
+### Plots of each combination of x, y, and z
+\
+\
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#scatter plots of each combination of x, y, and z
+
+ggplot(diamonds, aes(x = x, y = y)) +
+  geom_point()
+ggplot(diamonds, aes(x = x, y = z)) +
+  geom_point()
+ggplot(diamonds, aes(x = y, y = z)) +
+  geom_point()
+```
+
+### Price per Carat with respect to the cut
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+qplot(x = cut, y = price/carat, data = diamonds, geom = 'boxplot')+
+  ylab('Price/Carat')+
+  xlab('cut')
+```
+
+
+
+#### Cut distribitions 
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+qplot(x = price, data = diamonds, fill = I('blue'), color = I('black')) +
+  facet_wrap(~cut, ncol = 2)+
+  ylab('Number of Diamonds')+
+  xlab('Price')
+```
+
+
+
+## Inferential Statistics
+
+
+### The one-way ANOVA summary:
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+ 
+dia.aov <- aov(carat ~ cut, data=diamonds)
+summary(dia.aov) %>% pander()
+ 
+
+```
+
+***
+
+###Tukey’s Post-hoc test: 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+tu <- TukeyHSD(dia.aov)
+datatable(tu$cut)
+```
+

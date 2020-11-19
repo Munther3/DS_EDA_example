@@ -1,0 +1,68 @@
+---
+title: "Chick Weight Analysis"
+author: "Munther Alnghemshi"
+date: "10/13/2020"
+html_document:
+  toc: yes
+  toc_depth: '3'
+  df_print: paged
+---
+ 
+
+```{r setup , include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+ 
+library(tidyverse)
+library(DT)
+library(pander)
+```
+ 
+## Descriptive Statistics
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+cws <- chickwts %>%
+  group_by(feed) %>%
+  summarise(n = n(), Avg=mean(weight), SD = sd(weight))
+datatable(cws)  
+
+```
+
+
+
+
+
+
+
+
+## Plots
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(chickwts, aes(x=feed,y=weight)) + geom_boxplot()
+```
+```{r chickwts, echo=FALSE}
+ggplot(chickwts,aes(x=feed, y=weight)) + geom_jitter() + stat_summary(fun.data = mean_sdl,fun.args = list(mult=1),col="red")
+
+```
+ 
+ 
+ 
+## Inferential Statistics
+### The one-way ANOVA summary:
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+chick.aov <- aov(weight ~ feed, data=chickwts)
+summary(chick.aov) %>% pander()
+ 
+
+```
+ 
+
+ 
+### Tukey’s Post-hoc test: 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+tu <- TukeyHSD(chick.aov)
+datatable(tu$feed)
+```
+ 
+ 
